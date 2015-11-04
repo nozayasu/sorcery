@@ -30,7 +30,12 @@ module Sorcery
       end
 
       def get_user_hash(access_token)
-        response = access_token.get(user_info_path)
+        if user_info_mapping.present?
+          query_string = { fields: user_info_mapping.keys.join(",") }.to_query
+          response = access_token.get("#{ user_info_path }?#{ query_string }")
+        else
+          response = access_token.get(user_info_path)
+        end
 
         auth_hash(access_token).tap do |h|
           h[:user_info] = JSON.parse(response.body)
